@@ -1,0 +1,7 @@
+name: TzModerate
+main: me.TzMarcio.com.TzModerado.Main
+version: 1.2
+
+commands:
+   moderate:
+      description: enters/exits the moderate mode.

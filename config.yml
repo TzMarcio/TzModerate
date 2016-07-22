@@ -1,0 +1,43 @@
+#Power to damage players? true = no false = yes
+Damage: true
+
+#Able to place blocks? true = no false = yes 
+Blocks: true
+
+#Power drop items? true = no false = yes
+Drops: true
+
+#Power takes items from the floor? true = no false = yes
+PickUPItens: true
+
+#Message when leaving the moderate mode!
+MSGLeave_Mode: "&2[Server] &aYou left the moderate way!"
+
+#Message when entering the moderate mode!
+MSGJoin_Mode: "&2[Server] &aYou entered the moderate mode!"
+
+#Gamemode to exit the moderate mode! 1 = creative 0 = survival
+Gamemode: 0
+
+#Gamemode to enter the moderate mode! 1 = creative 0 = survival
+Gamemode2: 1
+
+#Permission to give the command to enter the moderate mode!
+Permission: "Moderate.use"
+
+#Message without permission!
+Message_WithoutPermission: "&2[Server] &cYou do not have permission to use this command!"
+
+#Message command can only be run in-game!
+MSGCommand_ExecutedInGame: "&2[Server] &cYou can only use this in-game command!"
+
+#Message to empty the inventory when trying to enter the mode!
+MSGEmpty_inv: "&2[Server] &cYou need to empty the inventory!"
+
+#locked command message use <cmd> to refer to the command entered!
+MSGCmd_Block: "&2[Server] &cThe command &4<cmd> &cThis blocked!"
+
+#Commands lock when it enters the moderate mode!
+BlockCommands:
+- /bau
+- /chest
