@@ -33,100 +33,88 @@ public class Main extends JavaPlugin
   private FileConfiguration mods = null;
   private File modsFile = null;
 
-  public void onEnable()
-  {
-    getServer().getConsoleSender().sendMessage("§3[TzModerado] §bAtivando plugin...");
-    getServer().getConsoleSender().sendMessage("§3[TzModerado] §bPlugin ativado by §6TzMarcio");
+  public void onEnable(){
     saveDefaultConfig();
     Bukkit.getPluginManager().registerEvents(this, this);
     this.modsFile = new File(getDataFolder(), "mods.yml");
     this.mods = YamlConfiguration.loadConfiguration(this.modsFile);
   }
 
-  public void onDisable()
-  {
-    getServer().getConsoleSender().sendMessage("§4[TzModerado] §cDesativando plugin...");
-    getServer().getConsoleSender().sendMessage("§4[TzModerado] §cPlugin Desativado §6by: §eTzMarcio");
-  }
+  public void onDisable(){}
 
   @SuppressWarnings("deprecation")
-public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
-  {
-    if (cmd.getName().equalsIgnoreCase("moderar")) {
-      if (!(sender instanceof Player)) {
-        sender.sendMessage(getConfig().getString("MSGComando_ExecutadoInGame").replace("&", "§"));
-        return true;
-      }
-      Player p = (Player)sender;
-      String ss = p.getPlayer().getName();
-      if (p.hasPermission(getConfig().getString("Permissao"))) {
-        if (this.mods.getBoolean("TzModerado.List." + ss)) {
-          p.sendMessage(getConfig().getString("MSGSaiu_Modo").replace("&", "§"));
-          this.mods.set("TzModerado.List." + ss, Boolean.valueOf(false));
-          p.setGameMode(GameMode.getByValue(getConfig().getInt("Gamemode")));
-          p.getInventory().clear();
-          p.getInventory().setHelmet(null);
-          p.getInventory().setChestplate(null);
-          p.getInventory().setLeggings(null);
-          p.getInventory().setBoots(null);
-          try {
-            this.mods.save(this.modsFile);
-          } catch (IOException e) {
-            e.printStackTrace();
-          }
-        } else {
-          boolean isEmpty = false;
-          for (int is = 0; is < 36; is++) {
-            if (p.getInventory().getItem(is) != null)
-            {
-              isEmpty = true;
-              break;
-            }
-          }
-          if (isEmpty) {
-            p.sendMessage(getConfig().getString("MSGEsvazie_inv").replace("&", "§"));
-          }
-          else if ((p.getInventory().getHelmet() == null) && (p.getInventory().getChestplate() == null) && (p.getInventory().getLeggings() == null) && (p.getInventory().getBoots() == null)) {
-            p.sendMessage(getConfig().getString("MSGEntrou_Modo").replace("&", "§"));
-            this.mods.set("TzModerado.List." + ss, Boolean.valueOf(true));
-            p.setGameMode(GameMode.getByValue(getConfig().getInt("Gamemode2")));
-            try {
-              this.mods.save(this.modsFile);
-            } catch (IOException e) {
-              e.printStackTrace();
-            }
-          } else {
-            p.sendMessage(getConfig().getString("MSGEsvazie_inv").replace("&", "§"));
-          }
-        }
-      }
-      else {
-        p.sendMessage(getConfig().getString("Message_SemPermissao").replace("&", "§"));
-      }
+  public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args){
+    if (cmd.getName().equalsIgnoreCase("moderate")) {
+    	if (!(sender instanceof Player)) {
+    		sender.sendMessage(getConfig().getString("MSGCommand_ExecutedInGame").replace("&", "§"));
+    		return true;
+    	}
+    	Player p = (Player)sender;
+    	String ss = p.getPlayer().getName();
+    	if (p.hasPermission(getConfig().getString("Permission"))) {
+    		if (this.mods.getBoolean("TzModerate.List." + ss)) {
+    			p.sendMessage(getConfig().getString("MSGLeave_Mode").replace("&", "§"));
+    			this.mods.set("TzModerate.List." + ss, Boolean.valueOf(false));
+    			p.setGameMode(GameMode.getByValue(getConfig().getInt("Gamemode")));
+    			p.getInventory().clear();
+    			p.getInventory().setHelmet(null);
+    			p.getInventory().setChestplate(null);
+    			p.getInventory().setLeggings(null);
+    			p.getInventory().setBoots(null);
+    			try {
+    				this.mods.save(this.modsFile);
+    			} catch (IOException e) {
+    				e.printStackTrace();
+    			}
+    		} else {
+    			boolean isEmpty = false;
+    			for (int is = 0; is < 36; is++) {
+    				if (p.getInventory().getItem(is) != null){
+    					isEmpty = true;
+    					break;
+    				}
+    			}
+    			if (isEmpty) {
+    				p.sendMessage(getConfig().getString("MSGEmpty_inv").replace("&", "§"));
+    			}else if ((p.getInventory().getHelmet() == null) && (p.getInventory().getChestplate() == null) && (p.getInventory().getLeggings() == null) && (p.getInventory().getBoots() == null)) {
+    				p.sendMessage(getConfig().getString("MSGJoin_Mode").replace("&", "§"));
+    				this.mods.set("TzModerate.List." + ss, Boolean.valueOf(true));
+    				p.setGameMode(GameMode.getByValue(getConfig().getInt("Gamemode2")));
+    				try {
+    					this.mods.save(this.modsFile);
+    				} catch (IOException e) {
+    					e.printStackTrace();
+    				}
+    			} else {
+    				p.sendMessage(getConfig().getString("MSGEmpty_inv").replace("&", "§"));
+    			}
+    		}
+    	}else {
+    		p.sendMessage(getConfig().getString("Message_WithoutPermission").replace("&", "§"));
+    	}
     }
     return false;
+  	}
+
+  @EventHandler(priority=EventPriority.HIGH)
+  private void PlayerPickupItemEvent(PlayerPickupItemEvent event){
+	  Entity ps = event.getPlayer();
+	  if (!(ps instanceof Player)) {
+		  return;
+	  }
+	  Player p = event.getPlayer();
+	  String ss = p.getPlayer().getName();
+	  if(getConfig().getBoolean("PickUPItens")){
+		  if (this.mods.getBoolean("TzModerate.List." + ss)){
+			  event.setCancelled(true);
+		  }else{
+			  return;
+		  }
+	  }
   }
 
   @EventHandler(priority=EventPriority.HIGH)
-  private void PlayerPickupItemEvent(PlayerPickupItemEvent event)
-  {
-    Entity ps = event.getPlayer();
-    if (!(ps instanceof Player)) {
-      return;
-    }
-    Player p = event.getPlayer();
-    String ss = p.getPlayer().getName();
-    if(getConfig().getBoolean("PegarItens")){
-	    if (this.mods.getBoolean("TzModerado.List." + ss))
-	      event.setCancelled(true);
-	    else
-	      return;
-    }
-  }
-
-  @EventHandler(priority=EventPriority.HIGH)
-  private void onDrop(PlayerDropItemEvent event)
-  {
+  private void onDrop(PlayerDropItemEvent event){
     Entity ps = event.getPlayer();
     if (!(ps instanceof Player)) {
       return;
@@ -134,7 +122,7 @@ public boolean onCommand(CommandSender sender, Command cmd, String label, String
     Player p = event.getPlayer();
     String ss = p.getPlayer().getName();
     if(getConfig().getBoolean("Drops")){
-	    if (this.mods.getBoolean("TzModerado.List." + ss))
+	    if (this.mods.getBoolean("TzModerate.List." + ss))
 	      event.setCancelled(true);
 	    else
 	      return;
@@ -150,8 +138,8 @@ public boolean onCommand(CommandSender sender, Command cmd, String label, String
     }
     Player p = event.getPlayer();
     String ss = p.getPlayer().getName();
-    if (this.mods.getBoolean("TzModerado.List." + ss)) {
-      this.mods.set("TzModerado.List." + ss, Boolean.valueOf(false));
+    if (this.mods.getBoolean("TzModerate.List." + ss)) {
+      this.mods.set("TzModerate.List." + ss, Boolean.valueOf(false));
       p.getInventory().clear();
       p.getInventory().setHelmet(null);
       p.getInventory().setChestplate(null);
@@ -174,8 +162,8 @@ public boolean onCommand(CommandSender sender, Command cmd, String label, String
     }
     Player p = event.getPlayer();
     String ss = p.getPlayer().getName();
-    if(getConfig().getBoolean("Blocos")){
-	    if (this.mods.getBoolean("TzModerado.List." + ss))
+    if(getConfig().getBoolean("Blocks")){
+	    if (this.mods.getBoolean("TzModerate.List." + ss))
 	      event.setCancelled(true);
 	    else
 	      event.setCancelled(false);
@@ -196,8 +184,8 @@ public boolean onCommand(CommandSender sender, Command cmd, String label, String
     int is = p.getItemInHand().getTypeId();
     Action a = e.getAction();
     if ((a == Action.RIGHT_CLICK_BLOCK) && (item == is))
-    	if(getConfig().getBoolean("Blocos")){
-	      if (this.mods.getBoolean("TzModerado.List." + ss))
+    	if(getConfig().getBoolean("Blocks")){
+	      if (this.mods.getBoolean("TzModerate.List." + ss))
 	        e.setCancelled(true);
 	      else
 	        return;
@@ -218,8 +206,8 @@ public boolean onCommand(CommandSender sender, Command cmd, String label, String
     int is = p.getItemInHand().getTypeId();
     Action a = e.getAction();
     if ((a == Action.RIGHT_CLICK_BLOCK) && (item == is) && (e.getClickedBlock() == e.getClickedBlock())) {
-    	if(getConfig().getBoolean("Blocos")){
-	      if (this.mods.getBoolean("TzModerado.List." + ss))
+    	if(getConfig().getBoolean("Blocks")){
+	      if (this.mods.getBoolean("TzModerate.List." + ss))
 	        e.setCancelled(true);
 	      else {
 	    	  return;
@@ -227,15 +215,14 @@ public boolean onCommand(CommandSender sender, Command cmd, String label, String
     	}
     }
     else if (e.getClickedBlock() == e.getClickedBlock())
-    	if(getConfig().getBoolean("Blocos")){
-	      if (this.mods.getBoolean("TzModerado.List." + ss))
+    	if(getConfig().getBoolean("Blocks")){
+	      if (this.mods.getBoolean("TzModerate.List." + ss))
 	        e.setCancelled(true);
 	      else
 	        return;
     	}
   }
 
-  @SuppressWarnings("deprecation")
 @EventHandler(priority=EventPriority.HIGH)
   private void onEntityDamage(EntityDamageByEntityEvent e)
   {
@@ -245,10 +232,10 @@ public boolean onCommand(CommandSender sender, Command cmd, String label, String
     }
     if ((e.getDamager() instanceof Projectile)) {
       Projectile damager = (Projectile)e.getDamager();
-      LivingEntity ss = damager.getShooter();
+      LivingEntity ss = (LivingEntity) damager.getShooter();
       String msp = ((OfflinePlayer)ss).getPlayer().getName();
-      if(getConfig().getBoolean("Dano")){
-	      if (this.mods.getBoolean("TzModerado.List." + msp))
+      if(getConfig().getBoolean("Damage")){
+	      if (this.mods.getBoolean("TzModerate.List." + msp))
 	        e.setCancelled(true);
 	      else
 	        return;
@@ -257,8 +244,8 @@ public boolean onCommand(CommandSender sender, Command cmd, String label, String
     else
     {
       String msp = ((OfflinePlayer)entity).getPlayer().getName();
-      if(getConfig().getBoolean("Dano")){
-	      if (this.mods.getBoolean("TzModerado.List." + msp))
+      if(getConfig().getBoolean("Damage")){
+	      if (this.mods.getBoolean("TzModerate.List." + msp))
 	        e.setCancelled(true);
 	      else
 	    	  return;
@@ -269,10 +256,10 @@ public boolean onCommand(CommandSender sender, Command cmd, String label, String
   @EventHandler
   public void onCmd(PlayerCommandPreprocessEvent e)
   {
-    for (String s : getConfig().getStringList("ComandosBloqueados"))
+    for (String s : getConfig().getStringList("BlockCommands"))
       if (e.getMessage().startsWith(s)) {
         e.setCancelled(true);
-        e.getPlayer().sendMessage(getConfig().getString("MSGCmd_Bloqueado").replace("&", "§").replace("<cmd>", e.getMessage()));
+        e.getPlayer().sendMessage(getConfig().getString("MSGCmd_Block").replace("&", "§").replace("<cmd>", e.getMessage()));
         return;
       }
   }
